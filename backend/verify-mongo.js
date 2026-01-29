@@ -7,7 +7,7 @@ dotenv.config();
 const verifyMongo = async () => {
     try {
         console.log('Connecting to MongoDB...');
-        await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/uniapply');
+        await mongoose.connect(process.env.MONGO_URI);
         console.log('✅ MongoDB Connected');
 
         // Test User creation

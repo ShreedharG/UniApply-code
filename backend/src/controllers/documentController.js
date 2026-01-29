@@ -1,5 +1,5 @@
 import { Document, Application } from '../models/index.js';
-import { extractDocumentData } from '../utils/aiService.js';
+
 import path from 'path';
 
 // @desc    Upload a document
@@ -14,7 +14,7 @@ export const uploadDocument = async (req, res) => {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        const application = await Application.findByPk(applicationId);
+        const application = await Application.findById(applicationId);
         if (!application) {
             return res.status(404).json({ message: 'Application not found' });
         }
@@ -32,24 +32,7 @@ export const uploadDocument = async (req, res) => {
             status: 'PENDING'
         });
 
-        // Trigger AI Extraction (Async)
-        // In a real production app, this should be a background job
-        extractDocumentData(file.path, type).then(async (result) => {
-            document.aiExtractionData = result.extractedData;
 
-            // Auto-verify if AI is confident (Mock logic)
-            if (result.verificationStatus === 'VERIFIED') {
-                // We can auto-verify or keep it pending for admin. 
-                // Requirement says: "AI flags potential issues for admin to check"
-                // So we store the AI result but let Admin decide mostly, 
-                // OR we can set status if confidence is high.
-                // Let's set it to PENDING but attach data.
-            } else {
-                // Could flag it
-                document.adminComments = "AI Alert: " + result.issues.join(", ");
-            }
-            await document.save();
-        });
 
         res.status(201).json(document);
     } catch (error) {
@@ -64,7 +47,7 @@ export const verifyDocument = async (req, res) => {
     const { status, adminComments } = req.body;
 
     try {
-        const document = await Document.findByPk(req.params.id);
+        const document = await Document.findById(req.params.id);
 
         if (!document) {
             return res.status(404).json({ message: 'Document not found' });

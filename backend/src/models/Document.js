@@ -19,9 +19,7 @@ const documentSchema = new mongoose.Schema({
         enum: ['PENDING', 'VERIFIED', 'REJECTED'],
         default: 'PENDING'
     },
-    aiExtractionData: {
-        type: Object
-    },
+
     adminComments: {
         type: String
     }

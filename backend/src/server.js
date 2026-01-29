@@ -6,7 +6,7 @@ import authRoutes from './routes/authRoutes.js';
 import applicationRoutes from './routes/applicationRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
 import ticketRoutes from './routes/ticketRoutes.js';
-import paymentRoutes from './routes/paymentRoutes.js';
+
 import universityRoutes from './routes/universityRoutes.js';
 import programRoutes from './routes/programRoutes.js';
 import path from 'path';
@@ -46,7 +46,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/tickets', ticketRoutes);
-app.use('/api/payments', paymentRoutes);
+
 app.use('/api/universities', universityRoutes);
 app.use('/api/programs', programRoutes);
 

@@ -30,7 +30,7 @@ const ticketSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum: ['DOCUMENT_ISSUE', 'PAYMENT', 'APPLICATION_STATUS', 'TECHNICAL', 'OTHER'],
+        enum: ['DOCUMENT_ISSUE', 'APPLICATION_STATUS', 'TECHNICAL', 'OTHER'],
         default: 'OTHER'
     },
     adminResponse: {
