@@ -1,36 +1,36 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js';
+import mongoose from 'mongoose';
 
-const University = sequelize.define('University', {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
-    },
+const universitySchema = new mongoose.Schema({
     name: {
-        type: DataTypes.STRING,
-        allowNull: false,
+        type: String,
+        required: true,
         unique: true
     },
     location: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: String,
+        required: true
     },
     ranking: {
-        type: DataTypes.INTEGER,
-        allowNull: true
+        type: Number
     },
     logoColor: {
-        type: DataTypes.STRING,
-        defaultValue: 'bg-blue-100 text-blue-700'
+        type: String,
+        default: 'bg-blue-100 text-blue-700'
     },
     description: {
-        type: DataTypes.TEXT,
-        allowNull: true
+        type: String
     }
 }, {
-    tableName: 'Universities',
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
 
+universitySchema.virtual('programs', {
+    ref: 'Program',
+    localField: '_id',
+    foreignField: 'universityId'
+});
+
+const University = mongoose.model('University', universitySchema);
 export default University;

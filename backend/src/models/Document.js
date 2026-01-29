@@ -1,34 +1,33 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js';
+import mongoose from 'mongoose';
 
-const Document = sequelize.define('Document', {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
+const documentSchema = new mongoose.Schema({
+    applicationId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Application',
+        required: true
     },
     type: {
-        type: DataTypes.STRING, // e.g., 'AADHAR', 'MARKSHEET_10', 'MARKSHEET_12'
-        allowNull: false
+        type: String,
+        required: true
     },
     url: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: String,
+        required: true
     },
     status: {
-        type: DataTypes.ENUM('PENDING', 'VERIFIED', 'REJECTED'),
-        defaultValue: 'PENDING'
+        type: String,
+        enum: ['PENDING', 'VERIFIED', 'REJECTED'],
+        default: 'PENDING'
     },
     aiExtractionData: {
-        type: DataTypes.JSONB, // Store extracted data from AI
-        allowNull: true
+        type: Object
     },
     adminComments: {
-        type: DataTypes.TEXT,
-        allowNull: true
+        type: String
     }
 }, {
     timestamps: true
 });
 
+const Document = mongoose.model('Document', documentSchema);
 export default Document;

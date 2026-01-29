@@ -1,67 +1,67 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js';
+import mongoose from 'mongoose';
 
-const Ticket = sequelize.define('Ticket', {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
-    },
+const ticketSchema = new mongoose.Schema({
     userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'Users',
-            key: 'id'
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
     applicationId: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: 'Applications',
-            key: 'id'
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Application'
     },
     subject: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: String,
+        required: true
     },
     description: {
-        type: DataTypes.TEXT,
-        allowNull: false
+        type: String,
+        required: true
     },
     status: {
-        type: DataTypes.ENUM('OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'),
-        defaultValue: 'OPEN'
+        type: String,
+        enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'],
+        default: 'OPEN'
     },
     priority: {
-        type: DataTypes.ENUM('LOW', 'MEDIUM', 'HIGH', 'URGENT'),
-        defaultValue: 'MEDIUM'
+        type: String,
+        enum: ['LOW', 'MEDIUM', 'HIGH', 'URGENT'],
+        default: 'MEDIUM'
     },
     category: {
-        type: DataTypes.ENUM('DOCUMENT_ISSUE', 'PAYMENT', 'APPLICATION_STATUS', 'TECHNICAL', 'OTHER'),
-        defaultValue: 'OTHER'
+        type: String,
+        enum: ['DOCUMENT_ISSUE', 'PAYMENT', 'APPLICATION_STATUS', 'TECHNICAL', 'OTHER'],
+        default: 'OTHER'
     },
     adminResponse: {
-        type: DataTypes.TEXT,
-        allowNull: true
+        type: String
     },
     respondedBy: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: 'Users',
-            key: 'id'
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
     respondedAt: {
-        type: DataTypes.DATE,
-        allowNull: true
+        type: Date
     }
 }, {
-    tableName: 'Tickets',
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
 
+ticketSchema.virtual('User', {
+    ref: 'User',
+    localField: 'userId',
+    foreignField: '_id',
+    justOne: true
+});
+
+ticketSchema.virtual('Application', {
+    ref: 'Application',
+    localField: 'applicationId',
+    foreignField: '_id',
+    justOne: true
+});
+
+const Ticket = mongoose.model('Ticket', ticketSchema);
 export default Ticket;

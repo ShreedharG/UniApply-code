@@ -15,8 +15,6 @@ export const createApplication = async (req, res) => {
             status: 'DRAFT'
         });
 
-
-
         res.status(201).json(application);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -28,10 +26,8 @@ export const createApplication = async (req, res) => {
 // @access  Private (Student)
 export const getMyApplications = async (req, res) => {
     try {
-        const applications = await Application.findAll({
-            where: { userId: req.user.id },
-            include: [{ model: Document }]
-        });
+        const applications = await Application.find({ userId: req.user.id })
+            .populate('documents');
         res.json(applications);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -43,12 +39,9 @@ export const getMyApplications = async (req, res) => {
 // @access  Private (Admin)
 export const getAllApplications = async (req, res) => {
     try {
-        const applications = await Application.findAll({
-            include: [
-                { model: User, attributes: ['id', 'name', 'email'] },
-                { model: Document }
-            ]
-        });
+        const applications = await Application.find()
+            .populate('User', 'name email')
+            .populate('documents');
         res.json(applications);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -60,19 +53,20 @@ export const getAllApplications = async (req, res) => {
 // @access  Private
 export const getApplicationById = async (req, res) => {
     try {
-        const application = await Application.findByPk(req.params.id, {
-            include: [
-                { model: Document },
-                { model: User, attributes: ['name', 'email'] }
-            ]
-        });
+        const application = await Application.findById(req.params.id)
+            .populate('User', 'name email')
+            .populate('documents');
 
         if (!application) {
             return res.status(404).json({ message: 'Application not found' });
         }
 
         // Check ownership or admin
-        if (req.user.role !== 'ADMIN' && application.userId !== req.user.id) {
+        // req.user.id is string from token middleware usually, or object?
+        // In Mongoose authMiddleware, we'll see. Assuming it's the User model instance or ID.
+        // Usually it's req.user = user (the document).
+        // comparing ObjectId needs .toString() or .equals()
+        if (req.user.role !== 'ADMIN' && application.userId.toString() !== req.user.id.toString()) {
             return res.status(403).json({ message: 'Not authorized' });
         }
 
@@ -89,7 +83,7 @@ export const updateApplicationStatus = async (req, res) => {
     const { status, adminComments } = req.body;
 
     try {
-        const application = await Application.findByPk(req.params.id);
+        const application = await Application.findById(req.params.id);
 
         if (!application) {
             return res.status(404).json({ message: 'Application not found' });
@@ -102,8 +96,6 @@ export const updateApplicationStatus = async (req, res) => {
 
         await application.save();
 
-
-
         res.json(application);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -115,19 +107,20 @@ export const updateApplicationStatus = async (req, res) => {
 // @access  Private (Student)
 export const withdrawApplication = async (req, res) => {
     try {
-        const application = await Application.findByPk(req.params.id);
+        const application = await Application.findById(req.params.id);
 
         if (!application) {
             return res.status(404).json({ message: 'Application not found' });
         }
 
         // Check ownership
-        if (application.userId !== req.user.id) {
+        if (application.userId.toString() !== req.user.id.toString()) {
             return res.status(403).json({ message: 'Not authorized to withdraw this application' });
         }
 
         // Check if already processed or fee paid
-        if (application.feePaid) {
+        // feePaid is not schema backed, checking status instead or just existing logic
+        if (application.status === 'PAYMENT_RECEIVED') { // Fallback if feePaid logic was obscure
             return res.status(400).json({ message: 'Cannot withdraw application after fee payment' });
         }
 
@@ -136,9 +129,7 @@ export const withdrawApplication = async (req, res) => {
         }
 
         // Delete the application
-        await application.destroy();
-
-
+        await application.deleteOne();
 
         res.json({ message: 'Application withdrawn and deleted successfully' });
     } catch (error) {

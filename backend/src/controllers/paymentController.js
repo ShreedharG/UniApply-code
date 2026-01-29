@@ -3,6 +3,9 @@ import { Payment, Application, Ticket } from '../models/index.js';
 // @desc    Create payment
 // @route   POST /api/payments
 // @access  Private
+// @desc    Create payment
+// @route   POST /api/payments
+// @access  Private
 export const createPayment = async (req, res) => {
     try {
         const { applicationId, ticketId, amount, type } = req.body;
@@ -28,7 +31,7 @@ export const createPayment = async (req, res) => {
 // @access  Private
 export const processPayment = async (req, res) => {
     try {
-        const payment = await Payment.findByPk(req.params.id);
+        const payment = await Payment.findById(req.params.id);
 
         if (!payment) {
             return res.status(404).json({ message: 'Payment not found' });
@@ -55,7 +58,7 @@ export const processPayment = async (req, res) => {
 
         // Update application/ticket status based on payment type
         if (payment.type === 'APPLICATION_FEE' && payment.applicationId) {
-            const application = await Application.findByPk(payment.applicationId);
+            const application = await Application.findById(payment.applicationId);
             if (application) {
                 application.status = 'PAYMENT_RECEIVED';
                 await application.save();
@@ -63,7 +66,7 @@ export const processPayment = async (req, res) => {
         }
 
         if (payment.type === 'ISSUE_RESOLUTION_FEE' && payment.ticketId) {
-            const ticket = await Ticket.findByPk(payment.ticketId);
+            const ticket = await Ticket.findById(payment.ticketId);
             if (ticket) {
                 ticket.status = 'IN_PROGRESS';
                 await ticket.save();
@@ -81,14 +84,10 @@ export const processPayment = async (req, res) => {
 // @access  Private
 export const getMyPayments = async (req, res) => {
     try {
-        const payments = await Payment.findAll({
-            where: { userId: req.user.id },
-            include: [
-                { model: Application, attributes: ['universityName', 'programName'] },
-                { model: Ticket, attributes: ['subject'] }
-            ],
-            order: [['createdAt', 'DESC']]
-        });
+        const payments = await Payment.find({ userId: req.user.id })
+            .populate('Application', 'universityName programName')
+            .populate('Ticket', 'subject')
+            .sort({ createdAt: -1 });
         res.json(payments);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -100,13 +99,10 @@ export const getMyPayments = async (req, res) => {
 // @access  Private (Admin)
 export const getAllPayments = async (req, res) => {
     try {
-        const payments = await Payment.findAll({
-            include: [
-                { model: Application },
-                { model: Ticket }
-            ],
-            order: [['createdAt', 'DESC']]
-        });
+        const payments = await Payment.find()
+            .populate('Application')
+            .populate('Ticket')
+            .sort({ createdAt: -1 });
         res.json(payments);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });

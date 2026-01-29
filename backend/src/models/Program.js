@@ -1,47 +1,36 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js';
+import mongoose from 'mongoose';
 
-const Program = sequelize.define('Program', {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
-    },
+const programSchema = new mongoose.Schema({
     universityId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'Universities',
-            key: 'id'
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'University',
+        required: true
     },
     name: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: String,
+        required: true
     },
     degree: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: String,
+        required: true
     },
     duration: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: String,
+        required: true
     },
     fee: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
+        type: Number,
+        required: true
     },
     description: {
-        type: DataTypes.TEXT,
-        allowNull: true
+        type: String
     },
     eligibility: {
-        type: DataTypes.JSON,
-        allowNull: true
+        type: Object
     }
 }, {
-    tableName: 'Programs',
     timestamps: true
 });
 
+const Program = mongoose.model('Program', programSchema);
 export default Program;

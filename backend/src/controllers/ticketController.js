@@ -17,8 +17,6 @@ export const createTicket = async (req, res) => {
             status: 'OPEN'
         });
 
-
-
         res.status(201).json(ticket);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -30,13 +28,9 @@ export const createTicket = async (req, res) => {
 // @access  Private (Student)
 export const getMyTickets = async (req, res) => {
     try {
-        const tickets = await Ticket.findAll({
-            where: { userId: req.user.id },
-            include: [
-                { model: Application, attributes: ['id', 'universityName', 'programName'] }
-            ],
-            order: [['createdAt', 'DESC']]
-        });
+        const tickets = await Ticket.find({ userId: req.user.id })
+            .populate('Application', 'universityName programName')
+            .sort({ createdAt: -1 });
         res.json(tickets);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -49,16 +43,12 @@ export const getMyTickets = async (req, res) => {
 export const getAllTickets = async (req, res) => {
     try {
         const { status } = req.query;
-        const where = status ? { status } : {};
+        const filter = status ? { status } : {};
 
-        const tickets = await Ticket.findAll({
-            where,
-            include: [
-                { model: User, as: 'User', attributes: ['id', 'name', 'email'] },
-                { model: Application, attributes: ['id', 'universityName', 'programName'] }
-            ],
-            order: [['createdAt', 'DESC']]
-        });
+        const tickets = await Ticket.find(filter)
+            .populate('User', 'name email')
+            .populate('Application', 'universityName programName')
+            .sort({ createdAt: -1 });
         res.json(tickets);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -70,19 +60,16 @@ export const getAllTickets = async (req, res) => {
 // @access  Private
 export const getTicketById = async (req, res) => {
     try {
-        const ticket = await Ticket.findByPk(req.params.id, {
-            include: [
-                { model: User, as: 'User', attributes: ['name', 'email'] },
-                { model: Application, attributes: ['universityName', 'programName'] }
-            ]
-        });
+        const ticket = await Ticket.findById(req.params.id)
+            .populate('User', 'name email')
+            .populate('Application', 'universityName programName');
 
         if (!ticket) {
             return res.status(404).json({ message: 'Ticket not found' });
         }
 
         // Check ownership or admin
-        if (req.user.role !== 'ADMIN' && ticket.userId !== req.user.id) {
+        if (req.user.role !== 'ADMIN' && ticket.userId.toString() !== req.user.id.toString()) {
             return res.status(403).json({ message: 'Not authorized' });
         }
 
@@ -99,7 +86,7 @@ export const respondToTicket = async (req, res) => {
     const { response, status } = req.body;
 
     try {
-        const ticket = await Ticket.findByPk(req.params.id);
+        const ticket = await Ticket.findById(req.params.id);
 
         if (!ticket) {
             return res.status(404).json({ message: 'Ticket not found' });
@@ -117,8 +104,6 @@ export const respondToTicket = async (req, res) => {
 
         await ticket.save();
 
-
-
         res.json(ticket);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -132,21 +117,19 @@ export const updateTicketStatus = async (req, res) => {
     const { status } = req.body;
 
     try {
-        const ticket = await Ticket.findByPk(req.params.id);
+        const ticket = await Ticket.findById(req.params.id);
 
         if (!ticket) {
             return res.status(404).json({ message: 'Ticket not found' });
         }
 
         // Allow owner to close their own tickets
-        if (req.user.role !== 'ADMIN' && ticket.userId !== req.user.id) {
+        if (req.user.role !== 'ADMIN' && ticket.userId.toString() !== req.user.id.toString()) {
             return res.status(403).json({ message: 'Not authorized' });
         }
 
         ticket.status = status;
         await ticket.save();
-
-
 
         res.json(ticket);
     } catch (error) {

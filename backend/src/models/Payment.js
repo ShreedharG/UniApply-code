@@ -1,72 +1,77 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js';
+import mongoose from 'mongoose';
 
-const Payment = sequelize.define('Payment', {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
-    },
+const paymentSchema = new mongoose.Schema({
     userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'Users',
-            key: 'id'
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
     applicationId: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: 'Applications',
-            key: 'id'
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Application'
     },
     ticketId: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: 'Tickets',
-            key: 'id'
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Ticket'
     },
     amount: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
+        type: Number,
+        required: true
     },
     currency: {
-        type: DataTypes.STRING(3),
-        defaultValue: 'INR'
+        type: String,
+        default: 'INR'
     },
     type: {
-        type: DataTypes.ENUM('APPLICATION_FEE', 'ISSUE_RESOLUTION_FEE'),
-        allowNull: false
+        type: String,
+        enum: ['APPLICATION_FEE', 'ISSUE_RESOLUTION_FEE'],
+        required: true
     },
     status: {
-        type: DataTypes.ENUM('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'REFUNDED'),
-        defaultValue: 'PENDING'
+        type: String,
+        enum: ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'REFUNDED'],
+        default: 'PENDING'
     },
     paymentMethod: {
-        type: DataTypes.STRING,
-        allowNull: true
+        type: String
     },
     transactionId: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        unique: true
+        type: String,
+        unique: true,
+        sparse: true
     },
     paymentGatewayResponse: {
-        type: DataTypes.JSON,
-        allowNull: true
+        type: Object
     },
     paidAt: {
-        type: DataTypes.DATE,
-        allowNull: true
+        type: Date
     }
 }, {
-    tableName: 'Payments',
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
 
+paymentSchema.virtual('User', {
+    ref: 'User',
+    localField: 'userId',
+    foreignField: '_id',
+    justOne: true
+});
+
+paymentSchema.virtual('Application', {
+    ref: 'Application',
+    localField: 'applicationId',
+    foreignField: '_id',
+    justOne: true
+});
+
+paymentSchema.virtual('Ticket', {
+    ref: 'Ticket',
+    localField: 'ticketId',
+    foreignField: '_id',
+    justOne: true
+});
+
+const Payment = mongoose.model('Payment', paymentSchema);
 export default Payment;

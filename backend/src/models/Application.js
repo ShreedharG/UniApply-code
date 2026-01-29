@@ -1,34 +1,48 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js';
+import mongoose from 'mongoose';
 
-const Application = sequelize.define('Application', {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
+const applicationSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
     universityName: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: String,
+        required: true
     },
     programName: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: String,
+        required: true
     },
     status: {
-        type: DataTypes.ENUM('DRAFT', 'SUBMITTED', 'ISSUE_RAISED', 'VERIFIED', 'REJECTED', 'PAYMENT_RECEIVED', 'WITHDRAWN'),
-        defaultValue: 'DRAFT'
+        type: String,
+        enum: ['DRAFT', 'SUBMITTED', 'ISSUE_RAISED', 'VERIFIED', 'REJECTED', 'PAYMENT_RECEIVED', 'WITHDRAWN'],
+        default: 'DRAFT'
     },
     personalDetails: {
-        type: DataTypes.JSONB, // Store flexible form data
-        allowNull: true
+        type: Object
     },
     adminComments: {
-        type: DataTypes.TEXT,
-        allowNull: true
+        type: String
     }
 }, {
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
 
+applicationSchema.virtual('documents', {
+    ref: 'Document',
+    localField: '_id',
+    foreignField: 'applicationId'
+});
+
+applicationSchema.virtual('User', {
+    ref: 'User',
+    localField: 'userId',
+    foreignField: '_id',
+    justOne: true
+});
+
+const Application = mongoose.model('Application', applicationSchema);
 export default Application;
