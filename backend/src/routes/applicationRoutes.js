@@ -8,15 +8,15 @@ import {
     withdrawApplication
 } from '../controllers/applicationController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
-import { cacheMiddleware } from '../middleware/cacheMiddleware.js';
+
 
 const router = express.Router();
 
 router.route('/')
     .post(protect, createApplication)
-    .get(protect, admin, cacheMiddleware(120), getAllApplications); // Cache for 2 minutes
+    .get(protect, admin, getAllApplications);
 
-router.route('/my').get(protect, cacheMiddleware(300), getMyApplications); // Cache for 5 minutes
+router.route('/my').get(protect, getMyApplications);
 
 router.route('/:id')
     .get(protect, getApplicationById);

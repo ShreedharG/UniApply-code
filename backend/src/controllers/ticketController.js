@@ -1,5 +1,4 @@
 import { Ticket, User, Application } from '../models/index.js';
-import { invalidateCache } from '../middleware/cacheMiddleware.js';
 
 // @desc    Create a new ticket
 // @route   POST /api/tickets
@@ -18,8 +17,7 @@ export const createTicket = async (req, res) => {
             status: 'OPEN'
         });
 
-        // Invalidate cache
-        await invalidateCache('cache:*/tickets*');
+
 
         res.status(201).json(ticket);
     } catch (error) {
@@ -119,8 +117,7 @@ export const respondToTicket = async (req, res) => {
 
         await ticket.save();
 
-        // Invalidate cache
-        await invalidateCache('cache:*/tickets*');
+
 
         res.json(ticket);
     } catch (error) {
@@ -149,8 +146,7 @@ export const updateTicketStatus = async (req, res) => {
         ticket.status = status;
         await ticket.save();
 
-        // Invalidate cache
-        await invalidateCache('cache:*/tickets*');
+
 
         res.json(ticket);
     } catch (error) {

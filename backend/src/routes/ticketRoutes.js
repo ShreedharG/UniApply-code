@@ -8,15 +8,15 @@ import {
     updateTicketStatus
 } from '../controllers/ticketController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
-import { cacheMiddleware } from '../middleware/cacheMiddleware.js';
+
 
 const router = express.Router();
 
 router.route('/')
     .post(protect, createTicket)
-    .get(protect, admin, cacheMiddleware(120), getAllTickets); // Cache for 2 min
+    .get(protect, admin, getAllTickets);
 
-router.route('/my').get(protect, cacheMiddleware(300), getMyTickets); // Cache for 5 min
+router.route('/my').get(protect, getMyTickets);
 
 router.route('/:id')
     .get(protect, getTicketById);

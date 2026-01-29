@@ -64,8 +64,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             type="button"
             onClick={() => setIsLogin(true)}
             className={`flex-1 py-2 rounded-lg font-medium transition-all ${isLogin
-                ? 'bg-brand-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+              ? 'bg-brand-600 text-white'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
               }`}
           >
             Login
@@ -74,8 +74,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             type="button"
             onClick={() => setIsLogin(false)}
             className={`flex-1 py-2 rounded-lg font-medium transition-all ${!isLogin
-                ? 'bg-brand-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+              ? 'bg-brand-600 text-white'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
               }`}
           >
             Register
@@ -115,7 +115,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              placeholder="Enter your email"
+              placeholder="user@email.com"
             />
           </div>
 
@@ -129,7 +129,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              placeholder="Enter your password"
+              placeholder="user123"
             />
           </div>
 

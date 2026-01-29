@@ -1,5 +1,4 @@
 import { Payment, Application, Ticket } from '../models/index.js';
-import { invalidateCache } from '../middleware/cacheMiddleware.js';
 
 // @desc    Create payment
 // @route   POST /api/payments
@@ -60,7 +59,6 @@ export const processPayment = async (req, res) => {
             if (application) {
                 application.status = 'PAYMENT_RECEIVED';
                 await application.save();
-                await invalidateCache('cache:*/applications*');
             }
         }
 
@@ -69,7 +67,6 @@ export const processPayment = async (req, res) => {
             if (ticket) {
                 ticket.status = 'IN_PROGRESS';
                 await ticket.save();
-                await invalidateCache('cache:*/tickets*');
             }
         }
 

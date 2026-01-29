@@ -1,5 +1,4 @@
 import { Application, User, Document } from '../models/index.js';
-import { invalidateCache, invalidateUserCache } from '../middleware/cacheMiddleware.js';
 
 // @desc    Create a new application
 // @route   POST /api/applications
@@ -16,9 +15,7 @@ export const createApplication = async (req, res) => {
             status: 'DRAFT'
         });
 
-        // Invalidate caches
-        await invalidateUserCache(req.user.id);
-        await invalidateCache('cache:*/applications*');
+
 
         res.status(201).json(application);
     } catch (error) {
@@ -105,9 +102,7 @@ export const updateApplicationStatus = async (req, res) => {
 
         await application.save();
 
-        // Invalidate caches
-        await invalidateUserCache(application.userId);
-        await invalidateCache('cache:*/applications*');
+
 
         res.json(application);
     } catch (error) {
@@ -143,10 +138,7 @@ export const withdrawApplication = async (req, res) => {
         // Delete the application
         await application.destroy();
 
-        // Invalidate caches
-        console.log('Invalidating caches for user:', req.user.id);
-        await invalidateUserCache(req.user.id);
-        await invalidateCache('cache:*/applications*');
+
 
         res.json({ message: 'Application withdrawn and deleted successfully' });
     } catch (error) {
