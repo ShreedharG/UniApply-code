@@ -47,6 +47,7 @@ backend/
 │   ├── models/          # Sequelize models
 │   ├── routes/          # API routes
 │   ├── services/        # Business logic services
+│   ├── scripts/         # Testing scripts - .gitignore
 │   ├── utils/           # Utility functions
 │   └── server.js        # Application entry point
 ├── uploads/             # Uploaded files

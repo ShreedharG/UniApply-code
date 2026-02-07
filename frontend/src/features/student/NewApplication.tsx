@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link, useOutletContext } from 'react-router-dom';
-import { Check, ChevronRight, FileText, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Check, ChevronRight, FileText, ArrowLeft, AlertCircle, Search } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { University, Program, User } from '../../types';
 import { applicationService } from '../../services/applicationService';
@@ -16,6 +16,7 @@ export const NewApplication = () => {
   const [universities, setUniversities] = useState<any[]>([]);
   const [selectedUni, setSelectedUni] = useState<any | null>(null);
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     firstName: user.name.split(' ')[0] || '',
     lastName: user.name.split(' ').slice(1).join(' ') || '',
@@ -110,27 +111,53 @@ export const NewApplication = () => {
 
   const allDocumentsAvailable = Object.values(recordStatus).every(status => status);
 
+
+
+  const filteredUniversities = universities.filter(uni =>
+    uni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    uni.location.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {universities.map(uni => (
-              <div
-                key={uni.id}
-                onClick={() => setSelectedUni(uni)}
-                className={`p-6 border rounded-xl cursor-pointer transition-all hover:shadow-md ${selectedUni?.id === uni.id ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 ring-1 ring-brand-500' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-brand-200 dark:hover:border-brand-800'}`}
-              >
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${uni.logoColor} dark:bg-opacity-20`}>
-                  <span className="font-bold text-xl">{uni.name.charAt(0)}</span>
+          <div className="space-y-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search universities by name or location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredUniversities.map(uni => (
+                <div
+                  key={uni.id}
+                  onClick={() => setSelectedUni(uni)}
+                  className={`p-6 border rounded-xl cursor-pointer transition-all hover:shadow-md ${selectedUni?.id === uni.id ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 ring-1 ring-brand-500' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-brand-200 dark:hover:border-brand-800'}`}
+                >
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${uni.logoColor} dark:bg-opacity-20`}>
+                    <span className="font-bold text-xl">{uni.name.charAt(0)}</span>
+                  </div>
+                  <h3 className="font-semibold text-slate-900 dark:text-slate-100">{uni.name}</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{uni.location}</p>
+                  <div className="mt-4 text-xs font-medium bg-slate-100 dark:bg-slate-800 inline-block px-2 py-1 rounded text-slate-600 dark:text-slate-300">
+                    Rank #{uni.ranking}
+                  </div>
                 </div>
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100">{uni.name}</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{uni.location}</p>
-                <div className="mt-4 text-xs font-medium bg-slate-100 dark:bg-slate-800 inline-block px-2 py-1 rounded text-slate-600 dark:text-slate-300">
-                  Rank #{uni.ranking}
+              ))}
+
+              {filteredUniversities.length === 0 && (
+                <div className="col-span-full py-12 text-center text-slate-500 dark:text-slate-400">
+                  <p>No universities found matching "{searchQuery}"</p>
                 </div>
-              </div>
-            ))}
+              )}
+            </div>
           </div>
         );
       case 1:

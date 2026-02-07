@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB } from './config/database.js';
+import { verifyExternalServices } from './utils/serviceVerification.js';
 import authRoutes from './routes/authRoutes.js';
 import applicationRoutes from './routes/applicationRoutes.js';
 
@@ -60,6 +61,9 @@ app.use((err, req, res, next) => {
 const startServer = async () => {
     // Connect to mongoDB
     await connectDB();
+
+    // Verify External Services
+    await verifyExternalServices();
 
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
